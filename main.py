@@ -34,7 +34,7 @@ def get_clicks(bitlink_url, token):
 if __name__ == "__main__":
   load_dotenv()
   parser = createParser()
-  input_args = parser.parse_args(sys.argv[1:])
+  input_args = parser.parse_args()
   api_token = os.getenv("API_TOKEN")
   input_link = input_args.link
   verify_link = input_link.startswith(("https://", "http://"))
