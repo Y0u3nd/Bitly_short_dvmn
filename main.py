@@ -5,8 +5,6 @@ import sys
 import requests
 import argparse
 from dotenv import load_dotenv
-load_dotenv()
-
 
 def createParser():
   parser = argparse.ArgumentParser(
@@ -34,6 +32,7 @@ def get_clicks(bitlink_url, token):
 
 
 if __name__ == "__main__":
+  load_dotenv()
   parser = createParser()
   input_args = parser.parse_args(sys.argv[1:])
   api_token = os.getenv("API_TOKEN")
