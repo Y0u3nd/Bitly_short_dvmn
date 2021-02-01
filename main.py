@@ -1,58 +1,57 @@
 #! /usr/bin/env python
-
 import os
 import sys
 import requests
 import argparse
 from dotenv import load_dotenv
+from urllib.parse import urlunsplit, urlsplit
+
 
 def createParser():
-  parser = argparse.ArgumentParser(
-    description='Программа для API Bitly')
-  parser.add_argument("link", help="Ваша ссылка")
-  return parser
+    parser = argparse.ArgumentParser(description='Программа для API Bitly')
+    parser.add_argument("link", help="Ваша ссылка")
+    return parser
 
 
-def get_bitlink(longer_url, token):
-  access_token = "Bearer " + token
-  headers = {"Authorization":access_token}
-  payload = {"long_url":longer_url, "group_guid":"Bj84ivi7pJW", "domain":"bit.ly", "title":"YfffTest"}
-  response = requests.post("https://api-ssl.bitly.com/v4/bitlinks", headers=headers, json=payload)
-  response.raise_for_status()
-  return response.json()["link"]
+def get_bitlink(split_link, bitly_api_token, group_guid="Bj84ivi7pJW", domain="bit.ly", title="YfffTest"):
+    unsplit_link = split_link.geturl()
+    access_token = f"Bearer {bitly_api_token}"
+    headers = {"Authorization": access_token}
+    payload = {"long_url": unsplit_link, "group_guid": group_guid, "domain": domain, "title": title}
+    response = requests.post("https://api-ssl.bitly.com/v4/bitlinks", headers=headers, json=payload)
+    response.raise_for_status()
+    return response.json()["link"]
 
 
-def get_clicks(bitlink_url, token):
-  access_token = "Bearer " + token
-  headers = {"Authorization":access_token}
-  payload = {"unit":"day", "units":"-1", "unit_reference":""}
-  response = requests.get("https://api-ssl.bitly.com/v4/bitlinks/{}/clicks/summary".format(bitlink_url) , headers=headers, params=payload)
-  response.raise_for_status()
-  return response.json()["total_clicks"]
+def get_clicks(split_link, bitly_api_token, period="day"):
+    unsplit_link = split_link.netloc + split_link.path
+    access_token = f"Bearer {bitly_api_token}"
+    headers = {"Authorization": access_token}
+    payload = {"unit": period, "units": "-1", "unit_reference": ""}
+    response = requests.get(f"https://api-ssl.bitly.com/v4/bitlinks/{unsplit_link}/clicks/summary", headers=headers, params=payload)
+    response.raise_for_status()
+    return response.json()["total_clicks"]
+
+
+def verify_bitlink(split_link, bitly_api_token):
+    unsplit_link = split_link.netloc + split_link.path
+    access_token = f"Bearer {bitly_api_token}"
+    headers = {"Authorization": access_token}
+    response = requests.get(f"https://api-ssl.bitly.com/v4/bitlinks/{unsplit_link}", headers=headers)
+    try:
+        return response.ok
+    except requests.exceptions.HTTPError as error:
+        return False
 
 
 if __name__ == "__main__":
-  load_dotenv()
-  parser = createParser()
-  input_args = parser.parse_args()
-  api_token = os.getenv("API_TOKEN")
-  input_link = input_args.link
-  verify_link = input_link.startswith(("https://", "http://"))
-  try:
-    if verify_link == True:
-      bitlink = get_bitlink(input_link, api_token)
-      if bitlink is None:
-        print("Ссылка некорректна")
-      else:
-        print(bitlink)
-    elif verify_link == False:
-      bitclicks = get_clicks(input_link, api_token)
-      if bitclicks is None:
-        print("Ссылка некорректна")
-      else:
-        print("Количество переходов по ссылке битли:", bitclicks)
-  except requests.exceptions.HTTPError as error:
-    exit("Bad link - {}".format(error))
-  except ValueError:
-    bitlink = None
-    bitclicks = None
+    load_dotenv()
+    bitly_api_token = os.getenv("API_TOKEN")
+    parser = createParser()
+    input_args = parser.parse_args()
+    input_link = input_args.link
+    split_link = urlsplit(input_link)
+    if verify_bitlink(split_link, bitly_api_token):
+        print(get_clicks(split_link, bitly_api_token))
+    else:
+        print(get_bitlink(split_link, bitly_api_token))
