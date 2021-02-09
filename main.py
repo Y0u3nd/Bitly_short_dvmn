@@ -45,7 +45,7 @@ if __name__ == "__main__":
     input_args = parser.parse_args()
     input_link = input_args.link
     splited_link = urlsplit(input_link)
-    unschemed_link = splited_link.netloc + splited_link.path
+    unschemed_link = f"{splited_link.netloc}{splited_link.path}"
     if verify_bitlink(unschemed_link, bitly_api_token):
         print(get_clicks(unschemed_link, bitly_api_token))
     else:
