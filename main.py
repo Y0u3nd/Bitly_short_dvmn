@@ -22,8 +22,7 @@ def get_bitlink(input_link, bitly_api_token, group_guid="Bj84ivi7pJW", domain="b
     return response.json()["link"]
 
 
-def get_clicks(split_link, bitly_api_token, period="day"):
-    unsplit_link = split_link.netloc + split_link.path
+def get_clicks(unsplit_link, bitly_api_token, period="day"):
     access_token = f"Bearer {bitly_api_token}"
     headers = {"Authorization": access_token}
     payload = {"unit": period, "units": "-1", "unit_reference": ""}
@@ -47,7 +46,7 @@ if __name__ == "__main__":
     input_link = input_args.link
     split_link = urlsplit(input_link)
     unsplit_link = split_link.netloc + split_link.path
-    if verify_bitlink(split_link, bitly_api_token):
-        print(get_clicks(split_link, bitly_api_token))
+    if verify_bitlink(unsplit_link, bitly_api_token):
+        print(get_clicks(unsplit_link, bitly_api_token))
     else:
-        print(get_bitlink(split_link, bitly_api_token))
+        print(get_bitlink(input_link, bitly_api_token))
