@@ -8,7 +8,7 @@ from urllib.parse import urlunsplit, urlsplit
 
 
 def createParser():
-    parser = argparse.ArgumentParser(description='Программа для API Bitly')
+    parser = argparse.ArgumentParser(description="Программа для API Bitly")
     parser.add_argument("link", help="Ваша ссылка")
     return parser
 
