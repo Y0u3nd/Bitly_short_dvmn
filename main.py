@@ -22,19 +22,19 @@ def get_bitlink(input_link, bitly_api_token, group_guid="Bj84ivi7pJW", domain="b
     return response.json()["link"]
 
 
-def get_clicks(unsplit_link, bitly_api_token, period="day"):
+def get_clicks(unschemed_link, bitly_api_token, period="day"):
     access_token = f"Bearer {bitly_api_token}"
     headers = {"Authorization": access_token}
     payload = {"unit": period, "units": "-1", "unit_reference": ""}
-    response = requests.get(f"https://api-ssl.bitly.com/v4/bitlinks/{unsplit_link}/clicks/summary", headers=headers, params=payload)
+    response = requests.get(f"https://api-ssl.bitly.com/v4/bitlinks/{unschemed_link}/clicks/summary", headers=headers, params=payload)
     response.raise_for_status()
     return response.json()["total_clicks"]
 
 
-def verify_bitlink(unsplit_link, bitly_api_token):
+def verify_bitlink(unschemed_link, bitly_api_token):
     access_token = f"Bearer {bitly_api_token}"
     headers = {"Authorization": access_token}
-    response = requests.get(f"https://api-ssl.bitly.com/v4/bitlinks/{unsplit_link}", headers=headers)
+    response = requests.get(f"https://api-ssl.bitly.com/v4/bitlinks/{unschemed_link}", headers=headers)
     return response.ok
 
 
@@ -44,9 +44,9 @@ if __name__ == "__main__":
     parser = createParser()
     input_args = parser.parse_args()
     input_link = input_args.link
-    split_link = urlsplit(input_link)
-    unsplit_link = split_link.netloc + split_link.path
-    if verify_bitlink(unsplit_link, bitly_api_token):
-        print(get_clicks(unsplit_link, bitly_api_token))
+    splited_link = urlsplit(input_link)
+    unschemed_link = splited_link.netloc + splited_link.path
+    if verify_bitlink(unschemed_link, bitly_api_token):
+        print(get_clicks(unschemed_link, bitly_api_token))
     else:
         print(get_bitlink(input_link, bitly_api_token))
