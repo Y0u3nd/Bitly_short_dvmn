@@ -13,11 +13,10 @@ def createParser():
     return parser
 
 
-def get_bitlink(split_link, bitly_api_token, group_guid="Bj84ivi7pJW", domain="bit.ly", title="YfffTest"):
-    unsplit_link = split_link.geturl()
+def get_bitlink(input_link, bitly_api_token, group_guid="Bj84ivi7pJW", domain="bit.ly", title="YfffTest"):
     access_token = f"Bearer {bitly_api_token}"
     headers = {"Authorization": access_token}
-    payload = {"long_url": unsplit_link, "group_guid": group_guid, "domain": domain, "title": title}
+    payload = {"long_url": input_link, "group_guid": group_guid, "domain": domain, "title": title}
     response = requests.post("https://api-ssl.bitly.com/v4/bitlinks", headers=headers, json=payload)
     response.raise_for_status()
     return response.json()["link"]
